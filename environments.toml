@@ -1,0 +1,50 @@
+# Scaffold Stellar environment configuration.
+# https://github.com/theahaco/scaffold-stellar
+
+### Development (local quickstart)
+[development.network]
+rpc-url = "http://localhost:8000/rpc"
+network-passphrase = "Standalone Network ; February 2017"
+run-locally = true
+
+[[development.accounts]]
+name = "me"
+default = true
+
+[development.contracts.trustline_authorizer]
+client = true
+# admin, sac, policy — Denylist (0) by default. The issuer must separately set
+# this contract as the SAC admin (SAC.set_admin) in an issuer-signed tx.
+constructor_args = "--admin me --sac <SAC_ADDRESS> --policy Denylist"
+
+[development.contracts.trustline_onboard]
+client = true
+
+### Staging (testnet)
+[staging.network]
+rpc-url = "https://soroban-testnet.stellar.org"
+network-passphrase = "Test SDF Network ; September 2015"
+
+[[staging.accounts]]
+name = "testnet-user"
+default = true
+
+[staging.contracts]
+# trustline_authorizer = { id = "C..." }
+# trustline_onboard    = { id = "C..." }
+
+### Production (mainnet)
+[production.network]
+rpc-url = "https://mainnet.sorobanrpc.com"
+network-passphrase = "Public Global Stellar Network ; September 2015"
+
+[[production.accounts]]
+name = "official-team-account"
+default = true
+
+[production.contracts]
+# Pin deployed mainnet contract ids here once live.
+# trustline_authorizer = { id = "C..." }
+# trustline_onboard    = { id = "C..." }
+# Reference: live EURCV precursor admin contract (eurcv_auth):
+# eurcv_auth = { id = "CB2DHZMQHQE3TGUMD6BRM7UCJZNIPKDRVEQOWBIRRS3G2FZOGDTRKSB3" }

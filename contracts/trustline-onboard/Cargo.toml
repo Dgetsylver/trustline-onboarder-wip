@@ -1,0 +1,19 @@
+[package]
+name = "trustline-onboard"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+description = "One-signature CAP-73 wrapper: create a trustline and authorize it in a single Soroban transaction."
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+# Integration test composes the real authorizer, not a stub.
+trustline-authorizer = { path = "../trustline-authorizer" }

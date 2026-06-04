@@ -1,0 +1,13 @@
+{
+  "name": "trustline-onboarder",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Asset-agnostic standard + reference implementation for one-signature Stellar trustline activation.",
+  "license": "Apache-2.0",
+  "workspaces": ["packages/*", "app"],
+  "repository": "https://github.com/theahaco/trustline-onboarder",
+  "scripts": {
+    "build": "npm run build --workspace @theaha/trustline-onboarder",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

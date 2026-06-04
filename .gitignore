@@ -1,0 +1,38 @@
+# Rust / Soroban
+/target
+**/target
+Cargo.lock.bak
+*.wasm.d
+test_snapshots/
+
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Stellar / Scaffold
+.stellar/
+.soroban/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editors
+.DS_Store
+*.log
+.idea/
+.vscode/
+
+# Generated Word deliverables (kept on disk, not committed)
+submission/*.docx
+
+# SCF submission materials — kept local only, never published
+APPLICATION.md
+ARCHITECTURE.md
+/sep/
+/submission/
+docs/img/banner.png
+docs/img/banner.svg
