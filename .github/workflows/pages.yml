@@ -25,9 +25,9 @@ jobs:
       - name: Install workspace deps
         run: npm install
       - name: Build SDK
-        run: npm run build --workspace @theaha/trustline-onboarder
+        run: npm run build --workspace @theaha/authline
       - name: Build activation page (wired to testnet)
-        run: npm run build --workspace trustline-onboarder-app
+        run: npm run build --workspace authline-app
         env:
           PUBLIC_STELLAR_RPC_URL: https://soroban-testnet.stellar.org
           PUBLIC_STELLAR_HORIZON_URL: https://horizon-testnet.stellar.org
