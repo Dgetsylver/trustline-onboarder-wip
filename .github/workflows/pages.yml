@@ -1,0 +1,57 @@
+name: Deploy activation page to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install workspace deps
+        run: npm install
+      - name: Build SDK
+        run: npm run build --workspace @theaha/trustline-onboarder
+      - name: Build activation page (wired to testnet)
+        run: npm run build --workspace trustline-onboarder-app
+        env:
+          PUBLIC_STELLAR_RPC_URL: https://soroban-testnet.stellar.org
+          PUBLIC_STELLAR_HORIZON_URL: https://horizon-testnet.stellar.org
+          PUBLIC_STELLAR_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
+          PUBLIC_ASSET_CODE: TLO
+          PUBLIC_ASSET_ISSUER: GATBENNAFELDD6XLFPIMT3GBYAGWT4A7XY45P4YCFVPK2HHRNC2HQJ4U
+          PUBLIC_SAC: CDVVAQAQ4FKQ4DCPPIIOIAOPRJJBO6HVOXRQX3PXONJVJNNK432O6HW3
+          PUBLIC_AUTHORIZER: CD7K7S43HSIR2DLGDT5OWSHDJQIQWFAJWZOIO66T2OVMLNYFL74OK2KU
+          PUBLIC_ONBOARD: CCQJ53C6C7ROJ6DSUG572NN46W3KHRT3BF3RDLZL4PGB4JYICDTPSAZ5
+          PUBLIC_TITLE: Welcome to Stellar
+          PUBLIC_SUBTITLE: Activate TLO on testnet in one signature.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
