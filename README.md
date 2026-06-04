@@ -121,6 +121,15 @@ npm run build --workspace @theaha/authline
 node examples/exchange-withdrawal/demo.mjs   # requires the Rust `stellar` CLI on PATH (see Status)
 ```
 
+[`examples/exchange-withdrawal/demo-open.mjs`](examples/exchange-withdrawal/demo-open.mjs) — the **open-asset** path (the majority case: not `AUTH_REQUIRED`, like USDC/EURC). The exchange establishes the trustline for a brand-new zero-XLM user (`buildSponsoredOnboardTx`, sponsored — one user signature), `assetAuthRequired` returns `false` so there is **no authorize step**, and the user immediately receives the asset. Runs fully in JS (no Soroban). Verified on testnet:
+
+- Sponsored trustline creation: [`97e284ca…`](https://stellar.expert/explorer/testnet/tx/97e284cae42ed4f21f2742f8a0afb793588672268435b52bec7c5b611ea03ed0)
+- Payment received (100 OPENX): [`354abf7c…`](https://stellar.expert/explorer/testnet/tx/354abf7c716e7fca01d5a78c1e15530842d61a134ec4197cfc745db3418fd9f7)
+
+```bash
+node examples/exchange-withdrawal/demo-open.mjs   # pure JS, no CLI needed
+```
+
 ## Status
 
 | Component | State |
