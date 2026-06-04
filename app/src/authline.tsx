@@ -250,6 +250,7 @@ function IssuerConsole({ onBack }: { onBack: () => void }) {
           <div style={{ flex: 2 }}><span style={labelStyle}>Your domain</span><input value={domain} onChange={(e) => setDomain(e.target.value)} style={inputStyle} spellCheck={false} /></div>
           <div style={{ flex: 1 }}><span style={labelStyle}>Asset code</span><input value={code} maxLength={12} onChange={(e) => setCode(e.target.value.toUpperCase())} style={inputStyle} spellCheck={false} /></div>
         </div>
+        <span style={labelStyle}>Readiness checks · preview</span>
         <div style={{ background: "#FBF8F2", border: `1px solid ${AL.line}`, borderRadius: 14, padding: "6px 16px" }}>
           <IssCheck state={checkState(0)} label="Asset is AUTH_REQUIRED" val="flag set" />
           <div style={{ height: 1, background: AL.line }} />
@@ -259,7 +260,7 @@ function IssuerConsole({ onBack }: { onBack: () => void }) {
         </div>
         {checkN < 3
           ? <div style={{ marginTop: 16 }}><Primary onClick={runChecks} disabled={running}>{running ? <>{<Spinner color={AL.mut} size={14} track="rgba(40,30,15,0.12)" />} Checking…</> : "Run readiness checks"}</Primary></div>
-          : <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 9, justifyContent: "center", fontFamily: AL.disp, fontSize: 13.5, color: AL.emeraldBright }}><Dot color={AL.emerald} /> Ready to list — these run on-chain, signed by you.</div>}
+          : <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 9, justifyContent: "center", fontFamily: AL.disp, fontSize: 13.5, color: AL.emeraldBright }}><Dot color={AL.emerald} /> Preview — in production these run on-chain (auth_required, SAC admin, toml fetch), signed by you.</div>}
       </div>
     );
   } else if (step === 1) {
@@ -295,8 +296,8 @@ function IssuerConsole({ onBack }: { onBack: () => void }) {
         <div style={{ width: 60, height: 60, borderRadius: 60, background: AL.emeraldSoft, border: `1px solid ${AL.emeraldLine}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", animation: "alpop .45s cubic-bezier(.2,.8,.3,1.2) both" }}>
           <svg width="30" height="30" viewBox="0 0 100 100" fill="none"><path className="al-check-c" d="M22 52 L42 72 L84 24" stroke={AL.emeraldBright} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </div>
-        <div style={{ fontFamily: AL.disp, fontWeight: 600, fontSize: 21, color: AL.ink, letterSpacing: "-0.02em" }}>{code || "USDX"} is live on Authline</div>
-        <p style={{ fontFamily: AL.disp, fontSize: 14, lineHeight: 1.55, color: AL.mut, margin: "8px auto 0", maxWidth: "34ch" }}>Holders discovering <span style={{ fontFamily: AL.mono, color: AL.ink }}>{domain}</span> can now activate {code || "USDX"} in one tap — no waiting list, no approval queue.</p>
+        <div style={{ fontFamily: AL.disp, fontWeight: 600, fontSize: 21, color: AL.ink, letterSpacing: "-0.02em" }}>{code || "USDX"} config ready to publish</div>
+        <p style={{ fontFamily: AL.disp, fontSize: 14, lineHeight: 1.55, color: AL.mut, margin: "8px auto 0", maxWidth: "36ch" }}>Add the block to <span style={{ fontFamily: AL.mono, color: AL.ink }}>{domain}</span>'s stellar.toml. Once it's live there, any Authline-compatible wallet or exchange can onboard holders to {code || "USDX"} in one tap — no waiting list, no approval queue.</p>
       </div>
     );
   }
@@ -304,7 +305,7 @@ function IssuerConsole({ onBack }: { onBack: () => void }) {
   let nav: React.ReactNode;
   if (step === 0) nav = <><Ghost full onClick={onBack}>Cancel</Ghost><Primary onClick={() => setStep(1)} disabled={checkN < 3}>Continue</Primary></>;
   else if (step === 1) nav = <><Ghost full onClick={() => setStep(0)}>‹ Back</Ghost><Primary onClick={() => setStep(2)}>Continue</Primary></>;
-  else if (step === 2) nav = <><Ghost full onClick={() => setStep(1)}>‹ Back</Ghost><Primary onClick={() => setStep(3)}>Publish &amp; list</Primary></>;
+  else if (step === 2) nav = <><Ghost full onClick={() => setStep(1)}>‹ Back</Ghost><Primary onClick={() => setStep(3)}>Finish</Primary></>;
   else nav = <Primary onClick={onBack}>Back to directory</Primary>;
 
   return (
