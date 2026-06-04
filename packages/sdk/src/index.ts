@@ -1,10 +1,13 @@
 /**
- * @theaha/trustline-onboarder
+ * @theaha/authline
  *
- * Integrator SDK for one-signature activation of AUTH_REQUIRED Stellar assets.
- * Wallets and exchanges use this to embed the Trustline Onboarder flow:
- * discover an issuer's onboarder config from its stellar.toml, build the
- * one-signature `onboard` transaction, and check activation status.
+ * Integrator SDK for establishing a Stellar trustline on behalf of a user.
+ * Exchanges, brokers and wallets use this to onboard a holder during a
+ * withdrawal — for OPEN assets (USDC/EURC, not AUTH_REQUIRED) the trustline is
+ * simply created (optionally sponsored); for REGULATED assets (EURCV-style,
+ * AUTH_REQUIRED) it is also authorized on the user's behalf with no user or
+ * issuer signature. Discover an issuer's config from its stellar.toml, build
+ * the right transaction for the asset class, and check activation status.
  *
  * See the SEP draft: ../../sep/SEP-XXXX-trustline-onboarder.md
  */
