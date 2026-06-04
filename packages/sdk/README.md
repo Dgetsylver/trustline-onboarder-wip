@@ -1,17 +1,17 @@
-# @theaha/trustline-onboarder
+# @theaha/authline
 
 Integrator SDK for **one-signature activation** of `AUTH_REQUIRED` Stellar
 classic assets. Wallets and exchanges embed the [Trustline Onboarder](../../README.md)
 flow with a few calls.
 
 ```bash
-npm install @theaha/trustline-onboarder
+npm install @theaha/authline
 ```
 
 ## Discover an issuer's onboarder
 
 ```ts
-import { discoverOnboarder } from "@theaha/trustline-onboarder";
+import { discoverOnboarder } from "@theaha/authline";
 
 // Reads https://theaha.co/.well-known/stellar.toml -> [TRUSTLINE_ONBOARDER]
 const config = await discoverOnboarder("theaha.co");
@@ -21,7 +21,7 @@ const config = await discoverOnboarder("theaha.co");
 ## Build the one-signature transaction
 
 ```ts
-import { buildOnboardTx } from "@theaha/trustline-onboarder";
+import { buildOnboardTx } from "@theaha/authline";
 
 const xdr = await buildOnboardTx({
   rpcUrl: "https://mainnet.sorobanrpc.com",
@@ -35,7 +35,7 @@ const xdr = await buildOnboardTx({
 ## React
 
 ```tsx
-import { ActivateButton } from "@theaha/trustline-onboarder/react";
+import { ActivateButton } from "@theaha/authline/react";
 
 <ActivateButton
   holder={address}
@@ -59,7 +59,7 @@ Use `selectBackend()` to choose per holder.
 ## Status
 
 ```ts
-import { getActivationStatus } from "@theaha/trustline-onboarder";
+import { getActivationStatus } from "@theaha/authline";
 const { hasTrustline, isAuthorized } = await getActivationStatus({
   horizonUrl, account, assetCode: config.assetCode, assetIssuer: config.assetIssuer,
 });

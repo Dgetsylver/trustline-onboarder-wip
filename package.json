@@ -7,7 +7,7 @@
   "workspaces": ["packages/*", "app"],
   "repository": "https://github.com/theahaco/trustline-onboarder",
   "scripts": {
-    "build": "npm run build --workspace @theaha/trustline-onboarder",
+    "build": "npm run build --workspace @theaha/authline",
     "typecheck": "npm run typecheck --workspaces --if-present"
   }
 }

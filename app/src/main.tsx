@@ -1,9 +1,10 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App.js";
+import "./authline.css";
+import { AuthlineApp } from "./authline.js";
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <AuthlineApp />
   </React.StrictMode>,
 );

@@ -8,6 +8,22 @@ export interface ActivationStatus {
 }
 
 /**
+ * Whether the asset is `AUTH_REQUIRED` (a regulated asset like EURCV that needs
+ * issuer authorization) vs an open classic asset (USDC, EURC) that only needs a
+ * trustline created. Drives whether onboarding includes an authorize-on-behalf
+ * step at all.
+ */
+export async function assetAuthRequired(args: { horizonUrl: string; assetIssuer: string }): Promise<boolean> {
+  const horizon = new Horizon.Server(args.horizonUrl);
+  try {
+    const issuer = await horizon.loadAccount(args.assetIssuer);
+    return !!issuer.flags?.auth_required;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Check whether `account` already has an authorized trustline for the asset, so
  * the UI can short-circuit ("already activated") instead of prompting a signature.
  */

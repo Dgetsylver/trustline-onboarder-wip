@@ -27,9 +27,17 @@ export interface OnboarderConfig {
   backends: Backend[];
 }
 
-export { discoverOnboarder, parseOnboarderToml } from "./discovery.js";
+export { discoverOnboarder, discoverOnboarder as discover, parseOnboarderToml } from "./discovery.js";
 export { buildOnboardTx, type BuildOnboardOptions } from "./onboard.js";
-export { getActivationStatus, type ActivationStatus } from "./status.js";
+export { getActivationStatus, getActivationStatus as status, assetAuthRequired, type ActivationStatus } from "./status.js";
+// Third-party (exchange / broker / wallet) integration surface.
+export {
+  buildAuthorizeTx,
+  buildSponsoredOnboardTx,
+  onboardingRequest,
+  asAccount,
+  type OnboardingRequest,
+} from "./exchange.js";
 
 /**
  * Pick the backend to use for a given holder. The CAP-73 one-signature path is

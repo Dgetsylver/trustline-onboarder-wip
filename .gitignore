@@ -34,5 +34,7 @@ APPLICATION.md
 ARCHITECTURE.md
 /sep/
 /submission/
-docs/img/banner.png
-docs/img/banner.svg
+
+# Stray design assets (kept local)
+*.zip
+/Trustline Authline SCF Banner.png
