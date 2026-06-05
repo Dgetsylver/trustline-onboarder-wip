@@ -1,7 +1,7 @@
 #![cfg(test)]
 extern crate std;
 
-use super::{TrustlineOnboard, TrustlineOnboardClient};
+use super::{Error, TrustlineOnboard, TrustlineOnboardClient};
 use soroban_sdk::testutils::{Address as _, IssuerFlags};
 use soroban_sdk::token::StellarAssetClient;
 use soroban_sdk::{Address, Env};
@@ -67,7 +67,12 @@ fn onboard_reverts_for_banned_holder() {
     let onboard = env.register(TrustlineOnboard, ());
     let client = TrustlineOnboardClient::new(&env, &onboard);
 
-    assert!(client.try_onboard(&sac_addr, &authorizer, &holder).is_err());
+    // The authorize step reverts with the exact AuthorizationFailed code (not
+    // merely "some error") and leaves the holder unauthorized.
+    assert_eq!(
+        client.try_onboard(&sac_addr, &authorizer, &holder),
+        Err(Ok(Error::AuthorizationFailed))
+    );
     assert!(!StellarAssetClient::new(&env, &sac_addr).authorized(&holder));
 }
 
