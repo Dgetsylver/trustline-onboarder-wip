@@ -32,6 +32,9 @@ pub enum Error {
     TrustFailed = 1,
     /// The authorizer rejected the trustline (banned / not allowed / paused).
     AuthorizationFailed = 2,
+    /// Post-condition failed: the holder is still not authorized on `sac` after
+    /// the authorize call (a wrong/divergent SAC, or an authorizer that no-ops).
+    NotAuthorized = 3,
 }
 
 /// The minimal interface the onboard wrapper needs from a Trustline Authorizer.
@@ -58,7 +61,8 @@ impl TrustlineOnboard {
         holder.require_auth();
 
         // CAP-73: idempotent — a no-op if the trustline already exists.
-        StellarAssetClient::new(&env, &sac)
+        let sac_client = StellarAssetClient::new(&env, &sac);
+        sac_client
             .try_trust(&holder)
             .map_err(|_| Error::TrustFailed)?
             .map_err(|_| Error::TrustFailed)?;
@@ -67,6 +71,13 @@ impl TrustlineOnboard {
             .try_authorize_trustline(&holder)
             .map_err(|_| Error::AuthorizationFailed)?
             .map_err(|_| Error::AuthorizationFailed)?;
+
+        // Post-condition: confirm the holder is actually authorized on THIS sac.
+        // Guards against a wrong/divergent SAC or an authorizer that no-ops
+        // (matches the hardening in stellar-assets PR #10).
+        if !sac_client.authorized(&holder) {
+            return Err(Error::NotAuthorized);
+        }
 
         Ok(())
     }

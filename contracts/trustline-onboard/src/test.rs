@@ -70,3 +70,41 @@ fn onboard_reverts_for_banned_holder() {
     assert!(client.try_onboard(&sac_addr, &authorizer, &holder).is_err());
     assert!(!StellarAssetClient::new(&env, &sac_addr).authorized(&holder));
 }
+
+/// A no-op authorizer: satisfies the `authorize_trustline` interface and returns
+/// success, but never calls `set_authorized` — a divergent / buggy authorizer.
+#[soroban_sdk::contract]
+struct NoopAuthorizer;
+
+#[soroban_sdk::contractimpl]
+impl NoopAuthorizer {
+    pub fn authorize_trustline(_env: Env, _account: Address) -> Result<(), soroban_sdk::Error> {
+        Ok(())
+    }
+}
+
+/// Post-condition guard: when the authorizer reports success but the holder is
+/// still not authorized on `sac`, `onboard` must fail with `NotAuthorized`
+/// rather than report a false success (matches stellar-assets PR #10 hardening).
+#[test]
+fn onboard_rejects_noop_authorizer() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let issuer = Address::generate(&env);
+    let holder = Address::generate(&env);
+
+    // AUTH_REQUIRED SAC, so a trustline is unauthorized until set_authorized.
+    let sac = env.register_stellar_asset_contract_v2(issuer.clone());
+    let sac_addr = sac.address();
+    sac.issuer().set_flag(IssuerFlags::RequiredFlag);
+
+    let noop = env.register(NoopAuthorizer, ());
+    let onboard = env.register(TrustlineOnboard, ());
+    let client = TrustlineOnboardClient::new(&env, &onboard);
+
+    // The no-op authorizer returns Ok without authorizing, so the only failure
+    // path is the post-condition -> NotAuthorized; the whole tx reverts.
+    assert!(client.try_onboard(&sac_addr, &noop, &holder).is_err());
+    assert!(!StellarAssetClient::new(&env, &sac_addr).authorized(&holder));
+}
