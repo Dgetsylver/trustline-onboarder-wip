@@ -46,7 +46,7 @@ const kit = new StellarWalletsKit({
 
 type Phase =
   | "directory" | "idle" | "ready" | "building" | "signing" | "submitting"
-  | "success" | "error" | "already" | "preview" | "issuer";
+  | "success" | "error" | "already" | "preview";
 
 // ── Atoms ────────────────────────────────────────────────────────────
 function Pill({ children, tone = "mut", accent }: { children: React.ReactNode; tone?: "mut" | "err"; accent?: boolean }) {
@@ -162,7 +162,7 @@ function Card({ children }: { children: React.ReactNode }) {
   return <div style={{ width: "100%", maxWidth: 384, background: AL.card, borderRadius: 20, border: `1px solid ${AL.line}`, padding: 26, boxShadow: "0 30px 70px -34px rgba(40,30,15,0.3)" }}>{children}</div>;
 }
 
-function Directory({ onPick, onList }: { onPick: (a: DirItem) => void; onList: () => void }) {
+function Directory({ onPick }: { onPick: (a: DirItem) => void }) {
   return (
     <div className="al-fade">
       <div style={{ fontFamily: AL.mono, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: AL.mut2, marginBottom: 14 }}>Supported assets</div>
@@ -184,147 +184,6 @@ function Directory({ onPick, onList }: { onPick: (a: DirItem) => void; onList: (
           );
         })}
       </div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, paddingTop: 16, borderTop: `1px solid ${AL.line}` }}>
-        <span style={{ fontFamily: AL.disp, fontSize: 13, color: AL.mut }}>Are you an issuer?</span>
-        <span className="al-link" onClick={onList} style={{ fontFamily: AL.disp, fontSize: 13.5, fontWeight: 500, color: AL.emeraldBright, cursor: "pointer" }}>List your asset →</span>
-      </div>
-    </div>
-  );
-}
-
-// ── Issuer console (guided; checks map to real read-only on-chain reads) ──
-function IssCheck({ state, label, val }: { state: "pending" | "running" | "ok"; label: string; val: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 0" }}>
-      <span style={{ width: 22, height: 22, borderRadius: 22, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: state === "ok" ? AL.emeraldSoft : "transparent", border: `1px solid ${state === "ok" ? AL.emeraldLine : AL.line}` }}>
-        {state === "running" ? <Spinner color={AL.emerald} size={13} /> : state === "ok" ? <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke={AL.emeraldBright} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 8.5l3 3 6-7" /></svg> : <span style={{ width: 5, height: 5, borderRadius: 5, background: AL.mut2 }} />}
-      </span>
-      <span style={{ fontFamily: AL.disp, fontSize: 14, color: state === "pending" ? AL.mut : AL.ink, flex: 1 }}>{label}</span>
-      <span style={{ fontFamily: AL.mono, fontSize: 11.5, color: state === "ok" ? AL.emeraldBright : AL.mut2, whiteSpace: "nowrap" }}>{state === "ok" ? val : state === "running" ? "…" : "queued"}</span>
-    </div>
-  );
-}
-function PolicyOption({ active, onClick, title, tag, desc }: { active: boolean; onClick: () => void; title: string; tag: string; desc: string }) {
-  return (
-    <button className="al-cta" onClick={onClick} style={{ textAlign: "left", cursor: "pointer", display: "block", width: "100%", padding: "15px 16px", borderRadius: 14, border: `1.5px solid ${active ? AL.emeraldLine : AL.line}`, background: active ? AL.emeraldSoft : "transparent" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-        <span style={{ width: 16, height: 16, borderRadius: 16, flexShrink: 0, border: `1.5px solid ${active ? AL.emerald : AL.mut2}`, display: "flex", alignItems: "center", justifyContent: "center" }}>{active && <span style={{ width: 8, height: 8, borderRadius: 8, background: AL.emerald }} />}</span>
-        <span style={{ fontFamily: AL.disp, fontWeight: 600, fontSize: 15.5, color: AL.ink }}>{title}</span>
-        <span style={{ marginLeft: "auto" }}><Pill accent>{tag}</Pill></span>
-      </div>
-      <div style={{ fontFamily: AL.disp, fontSize: 13, lineHeight: 1.5, color: AL.mut, paddingLeft: 26 }}>{desc}</div>
-    </button>
-  );
-}
-function IssuerConsole({ onBack }: { onBack: () => void }) {
-  const [step, setStep] = useState(0);
-  const [domain, setDomain] = useState("issuer.example.com");
-  const [code, setCode] = useState("USDX");
-  const [checkN, setCheckN] = useState(0);
-  const [running, setRunning] = useState(false);
-  const [policy, setPolicy] = useState<"open" | "gated">("open");
-  const [copied, setCopied] = useState(false);
-  const tmr = useRef<ReturnType<typeof setTimeout>[]>([]);
-  useEffect(() => () => tmr.current.forEach(clearTimeout), []);
-
-  const runChecks = () => {
-    tmr.current.forEach(clearTimeout); tmr.current = [];
-    setRunning(true); setCheckN(0);
-    [700, 1400, 2100].forEach((ms, i) => tmr.current.push(setTimeout(() => setCheckN(i + 1), ms)));
-    tmr.current.push(setTimeout(() => setRunning(false), 2200));
-  };
-  const checkState = (i: number): "pending" | "running" | "ok" => (checkN > i ? "ok" : running && checkN === i ? "running" : "pending");
-  const glyph = (code || "AS").slice(0, 2).toUpperCase();
-  const toml = `[TRUSTLINE_ONBOARDER]\nASSET_CODE="${code || "USDX"}"\nASSET_ISSUER="GA7QX…K2VX"\nAUTHORIZER="CAUTHZ…9F31"\nONBOARD_WRAPPER="CWRAP…4C8A"\nPOLICY="${policy === "open" ? "denylist" : "allowlist"}"\nBACKENDS=["cap73-one-signature","cap33-sponsored"]`;
-  const copy = () => { try { navigator.clipboard.writeText(toml); } catch { /* ignore */ } setCopied(true); setTimeout(() => setCopied(false), 1600); };
-
-  const inputStyle: React.CSSProperties = { width: "100%", fontFamily: AL.mono, fontSize: 13, color: AL.ink, background: "#FBF8F2", border: `1px solid ${AL.line}`, borderRadius: 10, padding: "11px 12px", outline: "none" };
-  const labelStyle: React.CSSProperties = { fontFamily: AL.mono, fontSize: 10.5, letterSpacing: "0.1em", textTransform: "uppercase", color: AL.mut2, marginBottom: 7, display: "block" };
-  const STEP_LABELS = ["Verify", "Policy", "Publish"];
-
-  let inner: React.ReactNode;
-  if (step === 0) {
-    inner = (
-      <div>
-        <div style={{ display: "flex", gap: 12, marginBottom: 18 }}>
-          <div style={{ flex: 2 }}><span style={labelStyle}>Your domain</span><input value={domain} onChange={(e) => setDomain(e.target.value)} style={inputStyle} spellCheck={false} /></div>
-          <div style={{ flex: 1 }}><span style={labelStyle}>Asset code</span><input value={code} maxLength={12} onChange={(e) => setCode(e.target.value.toUpperCase())} style={inputStyle} spellCheck={false} /></div>
-        </div>
-        <span style={labelStyle}>Readiness checks · preview</span>
-        <div style={{ background: "#FBF8F2", border: `1px solid ${AL.line}`, borderRadius: 14, padding: "6px 16px" }}>
-          <IssCheck state={checkState(0)} label="Asset is AUTH_REQUIRED" val="flag set" />
-          <div style={{ height: 1, background: AL.line }} />
-          <IssCheck state={checkState(1)} label="Authorizer set as asset admin" val="set_admin ✓" />
-          <div style={{ height: 1, background: AL.line }} />
-          <IssCheck state={checkState(2)} label="stellar.toml reachable" val={domain.slice(0, 16)} />
-        </div>
-        {checkN < 3
-          ? <div style={{ marginTop: 16 }}><Primary onClick={runChecks} disabled={running}>{running ? <>{<Spinner color={AL.mut} size={14} track="rgba(40,30,15,0.12)" />} Checking…</> : "Run readiness checks"}</Primary></div>
-          : <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 9, justifyContent: "center", fontFamily: AL.disp, fontSize: 13.5, color: AL.emeraldBright }}><Dot color={AL.emerald} /> Preview — in production these run on-chain (auth_required, SAC admin, toml fetch), signed by you.</div>}
-      </div>
-    );
-  } else if (step === 1) {
-    inner = (
-      <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
-        <p style={{ fontFamily: AL.disp, fontSize: 13.5, lineHeight: 1.55, color: AL.mut, margin: "0 0 4px" }}>Set the rule once. Authline enforces it automatically — no human approves each holder.</p>
-        <PolicyOption active={policy === "open"} onClick={() => setPolicy("open")} title="Open by default" tag="Stablecoins" desc="Anyone activates instantly; you keep the power to block bad actors (denylist)." />
-        <PolicyOption active={policy === "gated"} onClick={() => setPolicy("gated")} title="Approved holders only" tag="Securities" desc="Only addresses you've cleared can activate (allowlist) — for KYC'd assets." />
-      </div>
-    );
-  } else if (step === 2) {
-    inner = (
-      <div>
-        <span style={labelStyle}>Add to your stellar.toml</span>
-        <div style={{ position: "relative", background: "#1C1813", borderRadius: 13, padding: "15px 16px", marginBottom: 18 }}>
-          <button className="al-cta" onClick={copy} style={{ position: "absolute", top: 11, right: 11, cursor: "pointer", fontFamily: AL.disp, fontWeight: 600, fontSize: 11.5, color: copied ? "#9FE3BE" : "#E8E0D2", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 8, padding: "5px 10px" }}>{copied ? "Copied ✓" : "Copy"}</button>
-          <pre style={{ margin: 0, fontFamily: AL.mono, fontSize: 11.5, lineHeight: 1.7, color: "#EDE7DA", whiteSpace: "pre", overflowX: "auto" }}>{toml}</pre>
-        </div>
-        <span style={labelStyle}>What holders will see</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 13, background: "#FBF8F2", border: `1px solid ${AL.line}`, borderRadius: 14, padding: 15 }}>
-          <AssetGlyph label={glyph} size={42} />
-          <div style={{ lineHeight: 1.3, minWidth: 0, flex: 1 }}>
-            <div style={{ fontFamily: AL.disp, fontWeight: 600, fontSize: 15.5, color: AL.ink }}>{code || "USDX"}</div>
-            <div style={{ fontFamily: AL.disp, fontSize: 12.5, color: AL.mut }}>{domain}</div>
-          </div>
-          <span style={{ fontFamily: AL.disp, fontWeight: 600, fontSize: 12.5, color: "#fff", background: AL.emerald, borderRadius: 9, padding: "8px 12px", whiteSpace: "nowrap" }}>Activate {code || "USDX"}</span>
-        </div>
-      </div>
-    );
-  } else {
-    inner = (
-      <div style={{ textAlign: "center", padding: "6px 0 2px" }}>
-        <div style={{ width: 60, height: 60, borderRadius: 60, background: AL.emeraldSoft, border: `1px solid ${AL.emeraldLine}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", animation: "alpop .45s cubic-bezier(.2,.8,.3,1.2) both" }}>
-          <svg width="30" height="30" viewBox="0 0 100 100" fill="none"><path className="al-check-c" d="M22 52 L42 72 L84 24" stroke={AL.emeraldBright} strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </div>
-        <div style={{ fontFamily: AL.disp, fontWeight: 600, fontSize: 21, color: AL.ink, letterSpacing: "-0.02em" }}>{code || "USDX"} config ready to publish</div>
-        <p style={{ fontFamily: AL.disp, fontSize: 14, lineHeight: 1.55, color: AL.mut, margin: "8px auto 0", maxWidth: "36ch" }}>Add the block to <span style={{ fontFamily: AL.mono, color: AL.ink }}>{domain}</span>'s stellar.toml. Once it's live there, any Authline-compatible wallet or exchange can onboard holders to {code || "USDX"} in one tap — no waiting list, no approval queue.</p>
-      </div>
-    );
-  }
-
-  let nav: React.ReactNode;
-  if (step === 0) nav = <><Ghost full onClick={onBack}>Cancel</Ghost><Primary onClick={() => setStep(1)} disabled={checkN < 3}>Continue</Primary></>;
-  else if (step === 1) nav = <><Ghost full onClick={() => setStep(0)}>‹ Back</Ghost><Primary onClick={() => setStep(2)}>Continue</Primary></>;
-  else if (step === 2) nav = <><Ghost full onClick={() => setStep(1)}>‹ Back</Ghost><Primary onClick={() => setStep(3)}>Finish</Primary></>;
-  else nav = <Primary onClick={onBack}>Back to directory</Primary>;
-
-  return (
-    <div style={{ width: "100%", maxWidth: 552, background: AL.card, borderRadius: 20, border: `1px solid ${AL.line}`, padding: 26, boxShadow: "0 30px 60px -36px rgba(40,30,15,0.3)" }}>
-      {step < 3 && (
-        <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 22 }}>
-          {STEP_LABELS.map((l, i) => (
-            <div key={l} style={{ display: "contents" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ width: 24, height: 24, borderRadius: 24, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: AL.disp, fontWeight: 700, fontSize: 12, background: i <= step ? AL.emerald : "transparent", color: i <= step ? "#fff" : AL.mut2, border: `1.5px solid ${i <= step ? AL.emerald : AL.line}` }}>{i + 1}</span>
-                <span style={{ fontFamily: AL.disp, fontWeight: i === step ? 600 : 500, fontSize: 13.5, color: i === step ? AL.ink : AL.mut }}>{l}</span>
-              </div>
-              {i < 2 && <div style={{ flex: 1, height: 1.5, background: i < step ? AL.emerald : AL.line, margin: "0 12px" }} />}
-            </div>
-          ))}
-        </div>
-      )}
-      {inner}
-      <div style={{ display: "flex", gap: 10, marginTop: 22 }}>{nav}</div>
     </div>
   );
 }
@@ -403,9 +262,7 @@ export function AuthlineApp() {
 
   let body: React.ReactNode = null;
   if (phase === "directory") {
-    body = <Directory onPick={pick} onList={() => { setShowModal(false); setPhase("issuer"); }} />;
-  } else if (phase === "issuer") {
-    body = <IssuerConsole onBack={back} />;
+    body = <Directory onPick={pick} />;
   } else if (phase === "idle") {
     body = (
       <div className="al-fade">
@@ -521,11 +378,9 @@ export function AuthlineApp() {
     );
   }
 
-  const connected = !!address && !["idle", "preview", "directory", "issuer"].includes(phase);
+  const connected = !!address && !["idle", "preview", "directory"].includes(phase);
   const head = phase === "directory"
     ? { t: "Activate a Stellar asset", s: `One signature to hold any supported asset — ${ASSET.assetCode} is live now, more onboarding soon.` }
-    : phase === "issuer"
-    ? { t: "List your asset on Authline", s: "Make your Stellar asset self-serve in three steps — no waiting list." }
     : { t: `Activate ${ASSET.assetCode}`, s: `Receive ${ASSET.name} in one signature.` };
 
   return (
@@ -546,7 +401,7 @@ export function AuthlineApp() {
           <h1 style={{ margin: 0, fontFamily: AL.disp, fontWeight: 600, fontSize: 27, letterSpacing: "-0.025em", color: AL.ink }}>{head.t}</h1>
           <p style={{ margin: "8px 0 0", fontFamily: AL.disp, fontSize: 14.5, color: AL.mut, lineHeight: 1.5 }}>{head.s}</p>
         </div>
-        {phase === "issuer" ? body : <Card>{body}</Card>}
+        <Card>{body}</Card>
         <div style={{ fontFamily: AL.mono, fontSize: 11, color: AL.mut2, marginTop: 20, textAlign: "center", letterSpacing: "0.03em" }}>Powered by Authline · one signature via CAP-73</div>
       </div>
       {showModal && <WalletModal onPick={connect} onClose={() => setShowModal(false)} available={available} />}
