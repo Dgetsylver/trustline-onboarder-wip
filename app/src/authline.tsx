@@ -153,6 +153,11 @@ function AssetRow({ status }: { status: React.ReactNode }) {
       <div style={{ lineHeight: 1.3, minWidth: 0 }}>
         <div style={{ fontFamily: AL.disp, fontWeight: 600, fontSize: 17, color: AL.ink }}>{ASSET.assetCode}</div>
         <div style={{ fontFamily: AL.disp, fontSize: 12.5, color: AL.mut, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ASSET.name}</div>
+        {(ASSET.authClawback || ASSET.authRevocable) && (
+          <div style={{ fontFamily: AL.disp, fontSize: 11.5, color: "#B7791F", marginTop: 3, display: "flex", alignItems: "center", gap: 4 }}>
+            <span aria-hidden>⚠</span> {ASSET.authClawback ? "Issuer can freeze or claw back this asset" : "Issuer can freeze this asset"}
+          </div>
+        )}
       </div>
       <div style={{ marginLeft: "auto", flexShrink: 0 }}>{status}</div>
     </div>
@@ -175,6 +180,11 @@ function Directory({ onPick }: { onPick: (a: DirItem) => void }) {
               <div style={{ lineHeight: 1.3, minWidth: 0 }}>
                 <div style={{ fontFamily: AL.disp, fontWeight: 600, fontSize: 15.5, color: AL.ink }}>{a.code}</div>
                 <div style={{ fontFamily: AL.disp, fontSize: 12.5, color: AL.mut, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.name} · {a.kind}</div>
+                {a.authClawback && (
+                  <div style={{ fontFamily: AL.disp, fontSize: 11.5, color: "#B7791F", marginTop: 2, display: "flex", alignItems: "center", gap: 4 }}>
+                    <span aria-hidden>⚠</span> Issuer can freeze or claw back
+                  </div>
+                )}
               </div>
               <div style={{ marginLeft: "auto", flexShrink: 0, display: "flex", alignItems: "center", gap: 9 }}>
                 {live ? <Pill accent><Dot /> Live</Pill> : <Pill>Soon</Pill>}
