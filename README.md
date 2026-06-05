@@ -135,7 +135,7 @@ node examples/exchange-withdrawal/demo-open.mjs   # pure JS, no CLI needed
 | Component | State |
 |---|---|
 | **EURCV onboarder** (`eurcv_auth`) | **LIVE on mainnet** — denylist SAC-admin authorizer for SG-Forge's EURCV euro stablecoin. Contract [`CB2DHZMQHQE3TGUMD6BRM7UCJZNIPKDRVEQOWBIRRS3G2FZOGDTRKSB3`](https://stellar.expert/explorer/public/contract/CB2DHZMQHQE3TGUMD6BRM7UCJZNIPKDRVEQOWBIRRS3G2FZOGDTRKSB3) (repo private; available on request). |
-| **CAP-73 one-signature wrapper** | **IN-FLIGHT** — [`theahaco/stellar-assets` PR #10](https://github.com/theahaco/stellar-assets/pull/10). |
+| **CAP-73 one-signature wrapper** | **MERGED** — generic `onboard(sac, authorizer, holder)` + curated multi-asset registry (USDC/EURC/EURCV) in [`theahaco/stellar-assets` PR #10](https://github.com/theahaco/stellar-assets/pull/10) (merged 2026-06-05, public). Contract-level tested (incl. a `NotAuthorized` post-condition); end-to-end one-signature on a live wallet + mainnet rollout still to be exercised. |
 | **Contract Admin SEP** | admin-sep — [`theahaco/admin-sep`](https://github.com/theahaco/admin-sep) (SDF discussion #1670). |
 | **This repo** | Asset-agnostic Authorizer + onboard wrapper + `@theaha/authline` SDK + reference exchange demo — **deployed + working on testnet** (IDs above). |
 
