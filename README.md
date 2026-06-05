@@ -90,6 +90,7 @@ import {
   buildOnboardTx,            // Case C: the CAP-73 one-tx (trust + authorize)
   onboardingRequest,         // → { sep7Uri, deepLink, hostedUrl } handoffs
   selectBackend,             // cap73-one-signature vs cap33-sponsored
+  resolveOfficialAsset,      // curated, issuer-pinned registry — never resolve by code alone
 } from "@theaha/authline";
 ```
 
@@ -99,7 +100,8 @@ import {
 - **`buildAuthorizeTx()`** — the permissionless authorize-on-behalf Soroban tx; any funded `source` may submit it; **no user signature, no issuer signature**.
 - **`buildOnboardTx()`** — the CAP-73 one-tx for a funded holder (Case C).
 - **`onboardingRequest()`** → SEP-7 `web+stellar:tx` URI + wallet deep-link + hosted-redirect URL — the three ways to hand a Case-B/C tx to the user to sign once.
-- **`discover()`** — auto-discover an issuer's config from its `stellar.toml` `[TRUSTLINE_ONBOARDER]` block. One issuer config → universal interop, no bilateral deals.
+- **`discover()`** — auto-discover an issuer's config from its `stellar.toml` `[TRUSTLINE_ONBOARDER]` block, StrKey-validating every advertised address. One issuer config → universal interop, no bilateral deals.
+- **`OFFICIAL_ASSETS` / `resolveOfficialAsset()`** — a curated, **issuer-pinned** registry with load-time StrKey validation and a `capability` model (`open` / `permissionedOneStep` / `permissionedManual`): the "never resolve an asset by code alone" anti-copycat defense (aligned with `stellar-assets`). The reference UI surfaces a clawback/freeze warning for assets the issuer can claw back.
 
 A React entry (`@theaha/authline/react`) and an issuer admin CLI accompany the core.
 
@@ -138,6 +140,7 @@ node examples/exchange-withdrawal/demo-open.mjs   # pure JS, no CLI needed
 | **CAP-73 one-signature wrapper** | **MERGED** — generic `onboard(sac, authorizer, holder)` + curated multi-asset registry (USDC/EURC/EURCV) in [`theahaco/stellar-assets` PR #10](https://github.com/theahaco/stellar-assets/pull/10) (merged 2026-06-05, public). Contract-level tested (incl. a `NotAuthorized` post-condition); end-to-end one-signature on a live wallet + mainnet rollout still to be exercised. |
 | **Contract Admin SEP** | admin-sep — [`theahaco/admin-sep`](https://github.com/theahaco/admin-sep) (SDF discussion #1670). |
 | **This repo** | Asset-agnostic Authorizer + onboard wrapper + `@theaha/authline` SDK + reference exchange demo — **deployed + working on testnet** (IDs above). |
+| **SDK → stellar-assets** | **DRAFT PR (additive)** — [`theahaco/stellar-assets` PR #13](https://github.com/theahaco/stellar-assets/pull/13): the `@theaha/authline` SDK + SEP + demos contributed to the public repo, composing with the merged `onboard()` + live `eurcv_auth`. No contract / no existing file changed; CI green. |
 
 > **P26 JS-SDK note (honest caveat).** The JS `@stellar/stellar-sdk` (15.1.0) cannot yet **decode** a Protocol-26 Soroban simulation response that **writes a trustline flag**. The SDK **builds** the correct authorize-on-behalf transaction, but the demo **submits** it via the Rust `stellar` CLI / RPC, which is authoritative on Protocol 26. Classic flows (sponsored trustline, `status`, SEP-7) run in pure JS. This resolves when upstream ships P26 decode support.
 
