@@ -31,6 +31,19 @@ export interface OnboarderConfig {
 }
 
 export { discoverOnboarder, discoverOnboarder as discover, parseOnboarderToml } from "./discovery.js";
+// Curated, issuer-pinned registry + StrKey validation (anti-copycat defense).
+export {
+  OFFICIAL_ASSETS,
+  validateOfficialAsset,
+  assetsForNetwork,
+  resolveOfficialAsset,
+  netFromPassphrase,
+  isValidIssuer,
+  isValidContractId,
+  type OfficialAsset,
+  type AssetCapability,
+  type StellarNet,
+} from "./registry.js";
 export { buildOnboardTx, type BuildOnboardOptions } from "./onboard.js";
 export { getActivationStatus, getActivationStatus as status, assetAuthRequired, type ActivationStatus } from "./status.js";
 // Third-party (exchange / broker / wallet) integration surface.

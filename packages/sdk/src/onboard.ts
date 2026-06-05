@@ -38,6 +38,13 @@ export async function buildOnboardTx(opts: BuildOnboardOptions): Promise<string>
       "config.onboard is required for the one-signature path; the issuer has not deployed the onboard wrapper",
     );
   }
+  if (!opts.config.sac || !opts.config.authorizer) {
+    throw new Error(
+      "config.sac and config.authorizer are required for the one-signature CAP-73 path " +
+        "(regulated / AUTH_REQUIRED assets). An open asset has no authorizer — use " +
+        "buildSponsoredOnboardTx instead.",
+    );
+  }
   const server = new rpc.Server(opts.rpcUrl, { allowHttp: opts.allowHttp ?? false });
   const source = await server.getAccount(opts.holder);
 

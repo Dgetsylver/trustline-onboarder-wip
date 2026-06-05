@@ -1,3 +1,4 @@
+import { StrKey } from "@stellar/stellar-sdk";
 import type { Backend, OnboarderConfig } from "./index.js";
 
 /**
@@ -44,6 +45,18 @@ export function parseOnboarderToml(toml: string): OnboarderConfig | null {
   // open assets (USDC/EURC) — so it MUST NOT be required here, or the parser
   // would reject the spec's own open-asset toml.
   if (!assetCode || !assetIssuer || !sac) return null;
+
+  // A present-but-malformed strkey is a misconfiguration, not "no onboarder":
+  // reject it loudly so garbage never reaches `new Address(...)` downstream.
+  if (!StrKey.isValidEd25519PublicKey(assetIssuer))
+    throw new Error(`[TRUSTLINE_ONBOARDER]: ASSET_ISSUER is not a valid G-address: ${assetIssuer}`);
+  if (!StrKey.isValidContract(sac))
+    throw new Error(`[TRUSTLINE_ONBOARDER]: SAC is not a valid C-address: ${sac}`);
+  if (authorizer && !StrKey.isValidContract(authorizer))
+    throw new Error(`[TRUSTLINE_ONBOARDER]: AUTHORIZER is not a valid C-address: ${authorizer}`);
+  if (onboard && !StrKey.isValidContract(onboard))
+    throw new Error(`[TRUSTLINE_ONBOARDER]: ONBOARD_WRAPPER is not a valid C-address: ${onboard}`);
+
   return {
     assetCode,
     assetIssuer,
