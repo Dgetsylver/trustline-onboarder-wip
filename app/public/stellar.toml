@@ -12,8 +12,9 @@ ASSET_CODE = "EURCV"
 ASSET_ISSUER = "GCEYGIVOLAVBF2TG2RUSGTUJCIN75KEX3NGLMY4VPL4GFE5L355AXW3G"
 # SAC for the asset (deterministic from code+issuer); placeholder shown.
 SAC = "C_REPLACE_WITH_EURCV_SAC"
-# Trustline Authorizer (SAC admin). The live EURCV precursor is eurcv_auth:
+# Trustline Authorizer (SAC admin) — regulated (AUTH_REQUIRED) assets only; omit for open assets.
+# The live EURCV precursor is eurcv_auth:
 AUTHORIZER = "CB2DHZMQHQE3TGUMD6BRM7UCJZNIPKDRVEQOWBIRRS3G2FZOGDTRKSB3"
 # One-signature CAP-73 wrapper (deployed by this grant).
-ONBOARD = "C_REPLACE_WITH_ONBOARD_WRAPPER"
-BACKENDS = ["cap73-one-signature", "cap33-sponsored"]
+ONBOARD_WRAPPER = "C_REPLACE_WITH_ONBOARD_WRAPPER"
+BACKENDS = ["cap73-onesig", "cap33-sponsored"]

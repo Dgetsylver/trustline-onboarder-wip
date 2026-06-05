@@ -3,16 +3,17 @@ import type { Backend, OnboarderConfig } from "./index.js";
 /**
  * Discover an issuer's Trustline Onboarder support from its domain's
  * `stellar.toml` (SEP-1). The issuer advertises a `[TRUSTLINE_ONBOARDER]`
- * block, for example:
+ * block. `AUTHORIZER` is present only for regulated (`AUTH_REQUIRED`) assets;
+ * an open asset (USDC/EURC) omits it. For example (regulated):
  *
  * ```toml
  * [TRUSTLINE_ONBOARDER]
  * ASSET_CODE = "EURCV"
  * ASSET_ISSUER = "GCEYGIVOLAVBF2TG2RUSGTUJCIN75KEX3NGLMY4VPL4GFE5L355AXW3G"
  * SAC = "C..."
- * AUTHORIZER = "C..."          # the Trustline Authorizer (SAC admin)
- * ONBOARD = "C..."             # the one-signature CAP-73 wrapper
- * BACKENDS = ["cap73-one-signature", "cap33-sponsored"]
+ * AUTHORIZER = "C..."          # Trustline Authorizer (SAC admin); regulated assets only
+ * ONBOARD_WRAPPER = "C..."     # one-signature CAP-73 wrapper
+ * BACKENDS = ["cap73-onesig", "cap33-sponsored"]
  * ```
  */
 export async function discoverOnboarder(
@@ -34,10 +35,15 @@ export function parseOnboarderToml(toml: string): OnboarderConfig | null {
   const assetIssuer = str(block, "ASSET_ISSUER");
   const sac = str(block, "SAC");
   const authorizer = str(block, "AUTHORIZER");
-  const onboard = str(block, "ONBOARD");
-  const backends = arr(block, "BACKENDS").filter(isBackend);
+  // SEP-1 §6 field is ONBOARD_WRAPPER; accept legacy ONBOARD as an alias.
+  const onboard = str(block, "ONBOARD_WRAPPER") || str(block, "ONBOARD");
+  const backends = arr(block, "BACKENDS").map(normalizeBackend).filter(isBackend);
 
-  if (!assetCode || !assetIssuer || !sac || !authorizer) return null;
+  // Per SEP-1 §6, ASSET_CODE / ASSET_ISSUER / SAC are always required.
+  // AUTHORIZER is conditional: present for AUTH_REQUIRED assets, omitted for
+  // open assets (USDC/EURC) — so it MUST NOT be required here, or the parser
+  // would reject the spec's own open-asset toml.
+  if (!assetCode || !assetIssuer || !sac) return null;
   return {
     assetCode,
     assetIssuer,
@@ -71,6 +77,10 @@ function arr(block: string, key: string): string[] {
     .split(",")
     .map((s) => s.trim().replace(/^"|"$/g, ""))
     .filter(Boolean);
+}
+/** SEP-1 §6 uses the short token `cap73-onesig`; normalize to the SDK's canonical form. */
+function normalizeBackend(s: string): string {
+  return s === "cap73-onesig" ? "cap73-one-signature" : s;
 }
 function isBackend(s: string): s is Backend {
   return s === "cap73-one-signature" || s === "cap33-sponsored";
