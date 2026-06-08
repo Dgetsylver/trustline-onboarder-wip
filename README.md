@@ -58,14 +58,12 @@ CAP-73's `trust()` has no sponsorship, so this single-tx path is for a **funded*
 
 ## Contracts
 
-Deployed and working on **testnet**.
+The contracts (canonical home: [theahaco/stellar-assets](https://github.com/theahaco/stellar-assets)):
 
-| Contract | Testnet ID | Description |
+| Contract | Status / id | Description |
 |---|---|---|
-| [`trustline-authorizer`](contracts/trustline-authorizer) | `CD7K7S43HSIR2DLGDT5OWSHDJQIQWFAJWZOIO66T2OVMLNYFL74OK2KU` | Asset-agnostic SAC-admin authorization policy. **Permissionless** `authorize_trustline(account)` gated by a **denylist** (open-by-default) or **allowlist** (gated) policy. Plus `ban`/`unban`, `freeze`/`unfreeze`, `deauthorize_trustline`, `allow`/`disallow`, `mint`, `clawback`, `pause`/`unpause`, and admin (`admin`/`set_admin`/`upgrade`). Emits an audit-event trail. Generalizes the live `eurcv_auth` contract; built on admin-sep. |
-| [`trustline-onboard`](contracts/trustline-onboard) | `CCQJ53C6C7ROJ6DSUG572NN46W3KHRT3BF3RDLZL4PGB4JYICDTPSAZ5` | One-signature CAP-73 wrapper: `onboard(sac, authorizer, holder)` → `trust()` + `authorize_trustline` under one `holder.require_auth()`. |
-
-Test asset **TLO** (`AUTH_REQUIRED`): SAC `CDVVAQAQ4FKQ4DCPPIIOIAOPRJJBO6HVOXRQX3PXONJVJNNK432O6HW3`, issuer `GATBENNAFELDD6XLFPIMT3GBYAGWT4A7XY45P4YCFVPK2HHRNC2HQJ4U`.
+| `trustline-onboard` | **deployed on mainnet** — `CDH2Z3PMBEL2T3EBM3VW5ENDPURYUY7YIKX3XMU3TK5AP4P3LXMPAGLC` | One-signature CAP-73 wrapper: `onboard(sac, authorizer, holder)` → `trust()` + `authorize_trustline` under one `holder.require_auth()`, with a `NotAuthorized` post-condition. Merged (PR #10 / #12). |
+| Trustline Authorizer | live today as `eurcv_auth` (mainnet `CB2DHZ…KSB3`); the asset-agnostic generalization is the grant's contract deliverable | SAC-admin authorization policy. **Permissionless** `authorize_trustline(account)` gated by a **denylist** (open-by-default) or **allowlist** policy. Plus `ban`/`freeze`/`deauthorize`/`mint`/`clawback`/`pause`/`upgrade`, an audit-event trail, and admin (`admin`/`set_admin`/`upgrade`); built on admin-sep. |
 
 The Authorizer exposes the minimal interface the wrapper depends on:
 
@@ -139,8 +137,8 @@ node examples/exchange-withdrawal/demo-open.mjs   # pure JS, no CLI needed
 | **EURCV onboarder** (`eurcv_auth`) | **LIVE on mainnet** — denylist SAC-admin authorizer for SG-Forge's EURCV euro stablecoin. Contract [`CB2DHZMQHQE3TGUMD6BRM7UCJZNIPKDRVEQOWBIRRS3G2FZOGDTRKSB3`](https://stellar.expert/explorer/public/contract/CB2DHZMQHQE3TGUMD6BRM7UCJZNIPKDRVEQOWBIRRS3G2FZOGDTRKSB3) (repo private; available on request). |
 | **CAP-73 one-signature wrapper** | **MERGED** — generic `onboard(sac, authorizer, holder)` + curated multi-asset registry (USDC/EURC/EURCV) in [`theahaco/stellar-assets` PR #10](https://github.com/theahaco/stellar-assets/pull/10) (merged 2026-06-05, public). Contract-level tested (incl. a `NotAuthorized` post-condition); end-to-end one-signature on a live wallet + mainnet rollout still to be exercised. |
 | **Contract Admin SEP** | admin-sep — [`theahaco/admin-sep`](https://github.com/theahaco/admin-sep) (SDF discussion #1670). |
-| **This repo** | Asset-agnostic Authorizer + onboard wrapper + `@theaha/authline` SDK + reference exchange demo — **deployed + working on testnet** (IDs above). |
-| **SDK → stellar-assets** | **DRAFT PR (additive)** — [`theahaco/stellar-assets` PR #13](https://github.com/theahaco/stellar-assets/pull/13): the `@theaha/authline` SDK + SEP + demos contributed to the public repo, composing with the merged `onboard()` + live `eurcv_auth`. No contract / no existing file changed; CI green. |
+| **Canonical home** | The contracts, the `@theaha/authline` SDK, the Authline dApp, the SEP, and the demos are **merged in [theahaco/stellar-assets](https://github.com/theahaco/stellar-assets)** (the canonical repo); the onboard wrapper is **deployed on mainnet** (`CDH2Z3PM…`). This repo was the SCF staging fork; the ids above are its testnet deployments. |
+| **SDK + dApp** | **MERGED** in [theahaco/stellar-assets](https://github.com/theahaco/stellar-assets) (PR #13 / #14), security-reviewed; the open-asset path is in review (PR #16). |
 
 > **P26 JS-SDK note (honest caveat).** The JS `@stellar/stellar-sdk` (15.1.0) cannot yet **decode** a Protocol-26 Soroban simulation response that **writes a trustline flag**. The SDK **builds** the correct authorize-on-behalf transaction, but the demo **submits** it via the Rust `stellar` CLI / RPC, which is authoritative on Protocol 26. Classic flows (sponsored trustline, `status`, SEP-7) run in pure JS. This resolves when upstream ships P26 decode support.
 
@@ -180,7 +178,7 @@ npm run dev --workspace trustline-onboarder-app
 ├── packages/sdk/                  # @theaha/authline — integrator SDK (TypeScript)
 ├── examples/
 │   └── exchange-withdrawal/       # reference third-party withdrawal demo (testnet)
-├── app/                           # "Welcome to Stellar" activation page (Vite + React + Stellar Wallets Kit)
+├── app/                           # Authline dApp — recipient-side activation UI (Vite + React + Stellar Wallets Kit)
 ├── sep/                           # SEP-XXXX: Trustline Onboarder (draft)
 ├── ARCHITECTURE.md                # technical architecture
 └── environments.toml              # Scaffold Stellar network/deploy config
