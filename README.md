@@ -146,7 +146,7 @@ node examples/exchange-withdrawal/demo-open.mjs   # pure JS, no CLI needed
 
 Issuers publish a `stellar.toml` `[TRUSTLINE_ONBOARDER]` block (asset, sac, authorizer, onboard wrapper, policy, backends). Any integrator auto-discovers it via `discover()` → one issuer config → universal interop, **no bilateral deals**. Contrast with today: issuers approve trustlines by hand or run a SEP-8 approval server that co-signs every transaction; Authline delegates authorization **once** to a permissionless on-chain contract.
 
-The standard is drafted in [`sep/SEP-XXXX-trustline-onboarder.md`](sep/SEP-XXXX-trustline-onboarder.md).
+The standard is drafted as [SEP-XXXX (Google Doc)](https://docs.google.com/document/d/1TxkFnGtLZhdnrE2wEEj8McdoJ50jqcqMqbdIoI3_U5U/edit?usp=sharing) — source: [`sep/SEP-XXXX-trustline-onboarder.md`](sep/SEP-XXXX-trustline-onboarder.md) (also in `theahaco/stellar-assets`).
 
 ## Build & test
 
